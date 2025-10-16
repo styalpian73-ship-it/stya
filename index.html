@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Daftar & Biodata — Gabungan</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    body { background-color: #f8f9fa; }
+    h1 { font-weight: 700; color: #333; }
+    .card-person { border-radius: 12px; box-shadow: 0 6px 18px rgba(0,0,0,0.06); cursor: pointer; transition: transform .14s ease; }
+    .card-person:hover { transform: translateY(-4px); }
+    .person-img { width: 84px; height: 84px; object-fit: cover; border-radius: 50%; border: 3px solid #0d6efd; }
+    .selected { outline: 3px solid rgba(13,110,253,0.12); }
+    .panel { border-radius: 12px; padding: 20px; background: #fff; box-shadow: 0 6px 18px rgba(0,0,0,0.04); }
+    .biodata-card { border-radius: 12px; padding: 18px; background: #f9fafb; }
+    .small-muted { color: #6c757d; font-size: 0.9rem; }
+    @media (max-width: 991px) {
+      .row-cols-responsive { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container py-5">
+    <h1 class="text-center mb-4">Daftar Biodata</h1>
+
+    <div class="row g-4">
+      <!-- Left: daftar orang -->
+      <div class="col-lg-5">
+        <div class="d-flex flex-column gap-3">
+          <!-- cards will be injected here -->
+          <div id="listContainer"></div>
+        </div>
+      </div>
+
+      <!-- Right: panel detail / edit -->
+      <div class="col-lg-7">
+        <div class="panel">
+          <div id="detailPanel">
+            <!-- Display mode -->
+            <div id="displayView" class="biodata-card">
+              <div class="d-flex gap-3 align-items-center">
+                <img id="detailFoto" src="parel.jpg" alt="Foto" class="person-img">
+                <div>
+                  <h3 id="detailNama" class="mb-1">Rell</h3>
+                  <div class="small-muted" id="detailAlamat">Kaliwadas</div>
+                </div>
+              </div>
+
+              <hr>
+
+              <p><strong>Umur:</strong> <span id="detailUmur">18</span> tahun</p>
+              <p><strong>Email:</strong> <span id="detailEmail">Rell@gmail.com</span></p>
+              <p><strong>Hobi:</strong> <span id="detailHobi">Ngegame</span></p>
+
+              <div class="mt-3">
+                <button class="btn btn-primary" id="btnEdit">Edit Biodata</button>
+              </div>
+            </div>
+
+            <!-- Edit mode (hidden awalnya) -->
+            <div id="editView" style="display: none;">
+              <form id="biodataForm">
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="form-label">Nama</label>
+                    <input type="text" id="inputNama" class="form-control" required>
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label">Umur</label>
+                    <input type="number" id="inputUmur" class="form-control" min="0">
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label">Foto (nama file)</label>
+                    <input type="text" id="inputFoto" class="form-control" placeholder="parel.JPG">
+                    <div class="form-text">Letakkan file foto di folder yang sama agar bisa tampil.</div>
+                  </div>
+
+                  <div class="col-12">
+                    <label class="form-label">Email</label>
+                    <input type="email" id="inputEmail" class="form-control">
+                  </div>
+
+                  <div class="col-12">
+                    <label class="form-label">Alamat</label>
+                    <input type="text" id="inputAlamat" class="form-control">
+                  </div>
+
+                  <div class="col-12">
+                    <label class="form-label">Hobi</label>
+                    <input type="text" id="inputHobi" class="form-control">
+                  </div>
+
+                  <div class="col-12 d-flex gap-2 mt-2">
+                    <button type="button" class="btn btn-success" id="btnSave">Simpan</button>
+                    <button type="button" class="btn btn-secondary" id="btnCancel">Batal</button>
+                  </div>
+                </div>
+              </form>
+            </div>
+
+          </div> <!-- detailPanel -->
+        </div> <!-- panel -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // Data awal (gabungan dari index.html)
+    const biodata = [
+      { nama: "satya", umur: 18, alamat: "Kaliwadas", hobi: "Ngegame", foto: "jjm.webp", email: "styalpian@gmail.com" },
+      
+    ];
+
+    let selectedIndex = 0; // default pilih pertama
+
+    // Render daftar di kiri
+    function renderList() {
+      const container = document.getElementById('listContainer');
+      container.innerHTML = '';
+      biodata.forEach((p, i) => {
+        const div = document.createElement('div');
+        div.className = 'card card-person p-3 d-flex align-items-center';
+        if (i === selectedIndex) div.classList.add('selected');
+        div.style.cursor = 'pointer';
+        div.onclick = () => { selectPerson(i); };
+
+        div.innerHTML = `
+          <div class="d-flex align-items-center gap-3 w-100">
+            <img src="${p.foto}" alt="Foto ${p.nama}" class="person-img">
+            <div class="flex-grow-1">
+              <h5 class="mb-0">${p.nama}</h5>
+              <div class="small-muted">Umur: ${p.umur} • ${p.alamat}</div>
+            </div>
+            <div class="text-end small-muted">Hobi: ${p.hobi}</div>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    // Tampilkan detail orang yang dipilih
+    function showDetail(index) {
+      const p = biodata[index];
+      document.getElementById('detailFoto').src = p.foto;
+      document.getElementById('detailNama').innerText = p.nama;
+      document.getElementById('detailAlamat').innerText = p.alamat;
+      document.getElementById('detailUmur').innerText = p.umur;
+      document.getElementById('detailEmail').innerText = p.email || '';
+      document.getElementById('detailHobi').innerText = p.hobi || '';
+    }
+
+    // Pilih person
+    function selectPerson(index) {
+      selectedIndex = index;
+      renderList();
+      showDetail(index);
+      // pastikan view display (bukan edit)
+      showDisplay();
+    }
+
+    // Tampilkan edit view dan isi form dengan data current
+    function editBiodata() {
+      const p = biodata[selectedIndex];
+      document.getElementById('inputNama').value = p.nama;
+      document.getElementById('inputUmur').value = p.umur;
+      document.getElementById('inputFoto').value = p.foto;
+      document.getElementById('inputEmail').value = p.email || '';
+      document.getElementById('inputAlamat').value = p.alamat || '';
+      document.getElementById('inputHobi').value = p.hobi || '';
+      document.getElementById('displayView').style.display = 'none';
+      document.getElementById('editView').style.display = 'block';
+    }
+
+    function cancelEdit() {
+      showDisplay();
+    }
+
+    function showDisplay() {
+      document.getElementById('editView').style.display = 'none';
+      document.getElementById('displayView').style.display = 'block';
+    }
+
+    // Simpan perubahan form ke array dan update UI
+    function saveBiodata() {
+      const nama = document.getElementById('inputNama').value.trim();
+      const umur = Number(document.getElementById('inputUmur').value) || 0;
+      const foto = document.getElementById('inputFoto').value.trim() || 'parel.JPG';
+      const email = document.getElementById('inputEmail').value.trim();
+      const alamat = document.getElementById('inputAlamat').value.trim();
+      const hobi = document.getElementById('inputHobi').value.trim();
+
+      // Update array
+      biodata[selectedIndex] = { nama, umur, alamat, hobi, foto, email };
+
+      // Refresh UI
+      renderList();
+      showDetail(selectedIndex);
+      showDisplay();
+    }
+
+    // Event listeners tombol
+    document.addEventListener('DOMContentLoaded', () => {
+      renderList();
+      showDetail(selectedIndex);
+
+      document.getElementById('btnEdit').addEventListener('click', editBiodata);
+      document.getElementById('btnCancel').addEventListener('click', cancelEdit);
+      document.getElementById('btnSave').addEventListener('click', saveBiodata);
+    });
+  </script>
+</body>
+</html>
